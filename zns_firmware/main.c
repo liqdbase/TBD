@@ -64,7 +64,7 @@
 FemuSharedMemory *g_shm = NULL;
 QueueHandle_t xLogQueue;
 
-/* ★★★ [NEW] 현재 활성화된 정책 포인터 ★★★ */
+
 CachePolicy *current_policy = NULL;
 
 // -------------------------------------------------------------
@@ -82,15 +82,6 @@ typedef struct {
 // [Cache Management] LBA 검증 기반 Cache Lookup
 // -------------------------------------------------------------
 
-/**
- * 캐시에서 LBA 검색 (Linear Probing)
- * 
- * @return: 캐시 슬롯 번호 (Hit) 또는 -1 (Miss)
- * 
- * 변경 사항:
- * - ★ on_hit 호출 제거 (vWorkerTask에서 처리)
- * - Hit/Miss 통계는 여기서 업데이트 (정책 무관)
- */
 static int cache_lookup_with_probing(uint64_t lba) {
     if (lba >= MAX_LBA_MAP) {
         return -1;
@@ -129,13 +120,6 @@ static int cache_lookup_with_probing(uint64_t lba) {
                              memory_order_relaxed);
     return -1;  // Miss
 }
-
-/**
- * ★★★ [DELETED] cache_allocate_slot() 함수 삭제됨 ★★★
- * 
- * 이유: 하드코딩된 Round-Robin 로직을 policy_fifo.c로 이동
- * 대체: current_policy->select_victim() 호출
- */
 
 /**
  * 캐시에 새 엔트리 삽입 (Linear Probing)
@@ -372,7 +356,6 @@ void vStatsTask(void *pvParameters) {
             printf("\n[STATS] Requests: %lu | Hits: %lu (%.2f%%) | Misses: %lu | Evictions: %lu | Dirty: %lu (%.1f%%)\n",
                    total, hits, hit_rate, misses, evictions, dirty, dirty_percent);
             
-            /* ★★★ [NEW] 정책별 통계 출력 ★★★ */
             if (current_policy && current_policy->print_stats) {
                 current_policy->print_stats();
             }
