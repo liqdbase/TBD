@@ -19,7 +19,6 @@
 /* FEMU Shared Headers */
 #include "femu_shm_lib.h"
 
-/* ★★★ [NEW] Cache Policy Interface ★★★ */
 #include "policy.h"
 
 // -------------------------------------------------------------
